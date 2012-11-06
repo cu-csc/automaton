@@ -23,19 +23,30 @@ class Command(object):
         return process.returncode
 
 
-def read_config(config_file):
+def read_config(file):
     config = SafeConfigParser()
-    config.read(config_file)
+    config.read(file)
     return config
 
 
 def parse_options():
     parser = OptionParser()
-    parser.add_option("-c", "--config_file", action="store",
-                      dest="config_file", help="Location of the config file.")
+
     parser.add_option("-d", "--debug", action="store_true", dest="debug",
                       help="Enable debugging log level.")
-    parser.set_defaults(config_file="etc/automaton.conf")
     parser.set_defaults(debug=False)
+
+    parser.add_option("-g", "--global_file", action="store", dest="global_file",
+                      help="Location of the file with global parameters (default: etc/global.conf).")
+    parser.set_defaults(global_file="etc/global.conf")
+
+    parser.add_option("-c", "--clouds_file", action="store", dest="clouds_file",
+                      help="Location of the file with cloud parameters (default: etc/clouds.conf).")
+    parser.set_defaults(clouds_file="etc/clouds.conf")
+
+    parser.add_option("-b", "--benchmarking_file", action="store", dest="benchmarking_file",
+                      help="Location of the file with benchmarking parameters (default: etc/benchmarking.conf).")
+    parser.set_defaults(benchmarking_file="etc/benchmarking.conf")
+
     (options, args) = parser.parse_args()
     return (options, args)
