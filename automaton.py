@@ -26,16 +26,16 @@ class Automaton(Thread):
         #TODO(pdmars): do something
 
         # Code below demonstrates functionality of Cluster class:
-        for cluster in self.clusters.list:
-            cluster.connect()
-            print "connect"
+        #for cluster in self.clusters.list:
+            #cluster.connect()
+            #print "connect"
             #cluster.launch()
-            print "launching"
+            #print "launching"
             #cluster.log_info()
             #print "log_info"
             #fqdns = cluster.get_fqdns()
-            cluster.terminate_all()
-            print "terminate"
+            #cluster.terminate_all()
+            #print "terminate"
 
 def clean_exit(signum, frame):
     global SIGEXIT
@@ -46,10 +46,17 @@ def clean_exit(signum, frame):
 def main():
     (options, args) = parse_options()
     configure_logging(options.debug)
-
+    
+    
     config = Config(options)
     clusters = Clusters(config)
-
+    for cluster in clusters.list:
+        if options.launch_cluster:
+            cluster.connect()
+            cluster.launch()
+        if options.terminate_cluster:
+            cluster.connect()
+            cluster.terminate_all()
     signal.signal(signal.SIGINT, clean_exit)
     automaton = Automaton(config, clusters)
     automaton.start()
