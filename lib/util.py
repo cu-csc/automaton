@@ -114,7 +114,7 @@ def parse_options():
 
     parser.add_option("-l", "--launch_cluster", action="store_true",dest="launch_cluster",help="Launch desired number of clusters")
 
-    parser.add_option("-t", "--terminate_cluster", action="store_true",dest="terminate_cluster",help="Terminate desired number of clusters")
+    parser.add_option("-t", "--terminate_cluster", action="store",dest="terminate_cluster",help="Terminate desired number of clusters",default = False)
 
     parser.add_option("-s", "--deploy_software", action="store",dest="deploy_software",help="Deploy Software")
     
@@ -123,6 +123,8 @@ def parse_options():
     parser.add_option("-o", "--gather_logs", action="store",dest="gather_logs",help="Gather logs")
 
     parser.add_option("-p", "--generate_graphs", action="store_false",dest="verbose",help="Generate graphs that based on the collected logs")
+
+    parser.add_option("-i", "--show_id", action="store_true",dest="show_id",help="show the id of all running instances")
     
     (options, args) = parser.parse_args()
 

@@ -78,5 +78,6 @@ class Clouds(object):
 
         for cloud in self.list:
             if cloud.name == name:
+                
                 return cloud
         return None

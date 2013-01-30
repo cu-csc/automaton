@@ -67,18 +67,39 @@ class Cluster(object):
 
     def terminate_all(self):
         """ Loops through reservations and terminates every instance """
-        #all_instances=conn.get_all_instances()
+        
         reservations = list()
         if self.reservations:
             reservations = self.reservations
         else:
-            print self.clouds
             for cloud in self.clouds:
                 reservations = cloud.conn.get_all_instances()
         for reservation in reservations:
             for instance in reservation.instances:
                 instance.terminate()
                 LOG.debug("Terminated instance: " + instance.id)
+    def show_id(self):
+        reservations = list()
+        if self.reservations:
+            reservations = self.reservations
+        else:
+            for cloud in self.clouds:
+                reservations = cloud.conn.get_all_instances()
+        for reservation in reservations:
+            for instance in reservation.instances:
+                print instance.id
+    def terminate(self,instance_id):
+        reservations = list()
+        if self.reservations:
+            reservations = self.reservations
+        else:
+            for cloud in self.clouds:
+                reservations = cloud.conn.get_all_instances()
+        for reservation in reservations:
+            for instance in reservation.instances:
+                if instance.id==instance_id:
+                    instance.terminate()
+                    LOG.debug("Terminated instance: " + instance.id)
 
 class Clusters(object):
     """ Clusters class represents a collection of clusters specified in the benchmarking file """
