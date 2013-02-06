@@ -114,7 +114,7 @@ def parse_options():
 
     parser.add_option("-l", "--launch_cluster", action="store_true",dest="launch_cluster",help="Launch desired number of clusters")
 
-    parser.add_option("-t", "--terminate_cluster", action="store",dest="terminate_cluster",help="Terminate desired number of clusters",default = False)
+    parser.add_option("-t", "--terminate_cluster", action="store",dest="terminate_cluster",help="Terminate specific instance, arguement: all/instance_id",default = False)
 
     parser.add_option("-s", "--deploy_software", action="store",dest="deploy_software",help="Deploy Software")
     

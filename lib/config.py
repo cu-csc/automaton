@@ -1,3 +1,4 @@
+
 from lib.util import read_config
 
 class GlobalConfig(object):
@@ -41,6 +42,7 @@ class Config(object):
     """ Config class retrieves all configuration information """
 
     def __init__(self, options):
+        self.options = options
         self.globals = GlobalConfig(read_config(options.global_file))
         self.clouds = CloudsConfig(read_config(options.clouds_file))
         self.benchmarking = BenchmarkingConfig(read_config(options.benchmarking_file))

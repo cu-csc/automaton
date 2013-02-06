@@ -16,11 +16,10 @@ LOG = logging.getLogger(__name__)
 
 
 class Automaton(Thread):
-    def __init__(self, config, clusters,options):
+    def __init__(self, config, clusters):
         Thread.__init__(self)
         self.config = config
         self.clusters = clusters
-        self.options = options
     def run(self):
         LOG.info("Starting Automaton")
         #TODO(pdmars): do something
@@ -36,22 +35,21 @@ class Automaton(Thread):
             #fqdns = cluster.get_fqdns()
             #cluster.terminate_all()
             #print "terminate"
+        if self.config.options.show_id:
+                self.clusters.sql.printsql();
         for cluster in self.clusters.list:
-            if self.options.launch_cluster:
+            if self.config.options.launch_cluster:
                 print "launch"
                 cluster.connect()
                 cluster.launch()
-            if self.options.terminate_cluster:
+            if self.config.options.terminate_cluster:
                 print "terminate"
                 cluster.connect()
-                if self.options.terminate_cluster=="all":
+                if self.config.options.terminate_cluster=="all":
                     cluster.terminate_all()
-                else:
-                    cluster.terminate(self.options.terminate_cluster)
-            if self.options.show_id:
-                cluster.connect()
-                cluster.show_id()
-
+                elif self.config.options.terminate_cluster==cluster.name:
+                    cluster.terminate(cluster.name)
+            
 def clean_exit(signum, frame):
     global SIGEXIT
     SIGEXIT = True
@@ -66,7 +64,7 @@ def main():
     clusters = Clusters(config)
     
     signal.signal(signal.SIGINT, clean_exit)
-    automaton = Automaton(config, clusters, options)
+    automaton = Automaton(config, clusters)
     automaton.start()
     # wake every seconed to make sure signals are handled by the main thread
     # need this due to a quirk in the way Python threading handles signals
