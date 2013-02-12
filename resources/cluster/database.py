@@ -27,11 +27,19 @@ class Database(object):
 		c = conn.cursor()
 		c.execute('SELECT * FROM self WHERE instance=?', [instance_id])
 		row = c.fetchone()
-		if row[0]==cluster:
+		if row[0]==cluster and row[3]==1:
 			conn.close()
 			return True
 		conn.close()
 		return False
+
+	def countcluster(self):
+		conn = sqlite3.connect('self.db')
+		c = conn.cursor()
+		c.execute('SELECT COUNT(DISTINCT cluster) FROM self')
+		result=c.fetchone()
+		number = result[0]
+		return number
 
 	def printdata(self):
 		conn = sqlite3.connect('self.db')

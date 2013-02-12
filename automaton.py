@@ -47,8 +47,8 @@ class Automaton(Thread):
                 cluster.connect()
                 if self.config.options.terminate_cluster=="all":
                     cluster.terminate_all()
-                elif self.config.options.terminate_cluster==cluster.name:
-                    cluster.terminate(cluster.name)
+                else:
+                    cluster.terminate(self.config.options.terminate_cluster)
             
 def clean_exit(signum, frame):
     global SIGEXIT

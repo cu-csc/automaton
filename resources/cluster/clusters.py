@@ -82,8 +82,8 @@ class Cluster(object):
                 reservations = cloud.conn.get_all_instances()
         for reservation in reservations:
             for instance in reservation.instances:
-                self.database.terminate(instance.id)
                 instance.terminate()
+                self.database.terminate(instance.id)
                 LOG.debug("Terminated instance: " + instance.id)
 
     def terminate(self,cluster):
@@ -106,10 +106,11 @@ class Clusters(object):
         self.config = config
         avail_clouds = Clouds(self.config)
         self.database = Database()
-
         self.list = list()
+        a=0
         for benchmark in self.config.benchmarking.list:
+            a=a+1
             LOG.debug("Creating cluster for benchmark: " + benchmark.name)
-            cluster_name = benchmark.name
+            cluster_name = "cluster-"+str(self.database.countcluster()+a)
             self.list.append(Cluster(self.config, avail_clouds, benchmark,cluster_name,self.database))
     
