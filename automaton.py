@@ -36,7 +36,7 @@ class Automaton(Thread):
             #cluster.terminate_all()
             #print "terminate"
         if self.config.options.show_id:
-                self.clusters.sql.printsql();
+                self.clusters.database.printdata();
         for cluster in self.clusters.list:
             if self.config.options.launch_cluster:
                 print "launch"

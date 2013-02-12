@@ -2,7 +2,7 @@
 import logging
 import sqlite3
 from resources.cloud.clouds import Cloud, Clouds
-from resources.cluster.sql import Sql
+from resources.cluster.database import Database
 
 LOG = logging.getLogger(__name__)
 
@@ -18,13 +18,13 @@ class Cluster(object):
     (both references and section names are case-sensitive).
 
     """
-    def __init__(self, config, avail_clouds, benchmark,cluster_name,sql):
+    def __init__(self, config, avail_clouds, benchmark,cluster_name,database):
         self.config = config
         self.benchmark = benchmark
         self.name = cluster_name
         self.clouds = list()        # clouds from which instances are requested
         self.requests = list()      # number of instances requested
-        self.sql = sql
+        self.database = database
         for option in self.benchmark.dict:
             cloud = avail_clouds.lookup_by_name(option)
             request = int(self.benchmark.dict[option])
@@ -49,7 +49,7 @@ class Cluster(object):
                 reservation = self.clouds[i].boot_image()
                 self.reservations.append(reservation)
                 for instance in reservation.instances:
-                    self.sql.add(self.name,self.clouds[i].name,instance.id)
+                    self.database.add(self.name,self.clouds[i].name,instance.id)
                 
 
     def log_info(self):
@@ -82,8 +82,8 @@ class Cluster(object):
                 reservations = cloud.conn.get_all_instances()
         for reservation in reservations:
             for instance in reservation.instances:
+                self.database.terminate(instance.id)
                 instance.terminate()
-                self.sql.delete(instance.id)
                 LOG.debug("Terminated instance: " + instance.id)
 
     def terminate(self,cluster):
@@ -95,9 +95,9 @@ class Cluster(object):
                 reservations = cloud.conn.get_all_instances()
         for reservation in reservations:
             for instance in reservation.instances:
-                if self.sql.check(cluster,instance.id):
+                if self.database.check(cluster,instance.id):
                     instance.terminate()
-                    self.sql.delete(instance.id)
+                    self.database.terminate(instance.id)
                     LOG.debug("Terminated instance: " + instance.id)
 class Clusters(object):
     """ Clusters class represents a collection of clusters specified in the benchmarking file """
@@ -105,11 +105,11 @@ class Clusters(object):
     def __init__(self, config):
         self.config = config
         avail_clouds = Clouds(self.config)
-        self.sql = Sql()
+        self.database = Database()
 
         self.list = list()
         for benchmark in self.config.benchmarking.list:
             LOG.debug("Creating cluster for benchmark: " + benchmark.name)
             cluster_name = benchmark.name
-            self.list.append(Cluster(self.config, avail_clouds, benchmark,cluster_name,self.sql))
+            self.list.append(Cluster(self.config, avail_clouds, benchmark,cluster_name,self.database))
     
