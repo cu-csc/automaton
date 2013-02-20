@@ -120,7 +120,7 @@ def parse_options():
     
     parser.add_option("-e", "--excute_benchmarks", action="store",dest="excute_benchmarks",help="excute benchmarks")
     
-    parser.add_option("-o", "--gather_logs", action="store",dest="gather_logs",help="Gather logs")
+    parser.add_option("-o", "--gather_logs", action="store_true",dest="gather_logs",help="Gather logs")
 
     parser.add_option("-p", "--generate_graphs", action="store_false",dest="verbose",help="Generate graphs that based on the collected logs")
 
@@ -189,3 +189,9 @@ def is_executable_file(file_path):
 
     """
     return os.path.isfile(file_path) and os.access(file_path, os.X_OK)
+
+def read_path(path_src):
+    if len(path_src and ',')==1:
+        path_src = path_src.replace(' ', '').replace('\n', '')
+        paths = path_src.split(",")
+        return paths

@@ -37,6 +37,7 @@ class Automaton(Thread):
             #print "terminate"
         if self.config.options.show_id:
                 self.clusters.database.printdata();
+
         for cluster in self.clusters.list:
             if self.config.options.launch_cluster:
                 print "launch"
@@ -49,6 +50,9 @@ class Automaton(Thread):
                     cluster.terminate_all()
                 else:
                     cluster.terminate(self.config.options.terminate_cluster)
+            if self.config.options.gather_logs:
+                cluster.connect()
+                cluster.download_logs()
             
 def clean_exit(signum, frame):
     global SIGEXIT

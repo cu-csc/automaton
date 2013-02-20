@@ -1,5 +1,7 @@
 import logging
 import os
+import shutil
+import os.path
 
 from boto.ec2.connection import EC2Connection
 from boto.ec2.regioninfo import RegionInfo
@@ -63,6 +65,7 @@ class Cloud(object):
         boot_result = image_object.run(key_name=self.config.globals.key_name)
         LOG.debug("Attempted to boot an instance. Result: %s" % (boot_result))
         return boot_result
+
 
 class Clouds(object):
     """ Clusters class represents a collection of clouds specified in the clouds file """

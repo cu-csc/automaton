@@ -1,8 +1,10 @@
 # coding=utf-8
 import logging
 import sqlite3
+
 from resources.cloud.clouds import Cloud, Clouds
 from resources.cluster.database import Database
+from lib.util import read_path,Command
 
 LOG = logging.getLogger(__name__)
 
@@ -24,13 +26,17 @@ class Cluster(object):
         self.name = cluster_name
         self.clouds = list()        # clouds from which instances are requested
         self.requests = list()      # number of instances requested
+        self.path = list()
         self.database = database
         for option in self.benchmark.dict:
-            cloud = avail_clouds.lookup_by_name(option)
-            request = int(self.benchmark.dict[option])
-            if cloud != None and request > 0:
-                self.clouds.append(cloud)
-                self.requests.append(request)
+            if(option=="log_files"):
+                self.path = read_path(self.benchmark.dict[option])
+            else:
+                cloud = avail_clouds.lookup_by_name(option)
+                request = int(self.benchmark.dict[option])
+                if cloud != None and request > 0:
+                    self.clouds.append(cloud)
+                    self.requests.append(request)
         if len(self.clouds) == 0:
             LOG.debug("Benchmark \"%s\" does not have references to available clouds" % (self.benchmark.name))
         self.reservations = list()  # list of reservations that is populated in the launch() method
@@ -49,8 +55,7 @@ class Cluster(object):
                 reservation = self.clouds[i].boot_image()
                 self.reservations.append(reservation)
                 for instance in reservation.instances:
-                    self.database.add(self.name,self.clouds[i].name,instance.id)
-                
+                    self.database.add(self.name,self.clouds[i].name,instance.id,self.benchmark.name)
 
     def log_info(self):
         """ Loops through reservations and logs status information for every instance """
@@ -99,6 +104,32 @@ class Cluster(object):
                     instance.terminate()
                     self.database.terminate(instance.id)
                     LOG.debug("Terminated instance: " + instance.id)
+
+    def download_logs(self):
+        reservations = list()
+        local_path = "./log_files/"
+        local_path = local_path + self.benchmark.name
+        l = local_path
+        command = Command("mkdir -p "+local_path)
+        command.execute()
+        if self.reservations:
+            reservations = self.reservations
+        else:
+            for cloud in self.clouds:
+                reservations = cloud.conn.get_all_instances()
+        for reservation in reservations:
+            for instance in reservation.instances:
+                if self.database.check_benchmark(self.benchmark.name,instance.id):
+                    local_path = l+"/"+instance.id
+                    command = Command("mkdir -p "+local_path)
+                    command.execute()
+                    for path in self.path:
+                        com = "scp suiy@"+instance.ip_address+" "+ path +" "+local_path
+                        print com
+                        command = Command(com)
+                        command.execute()
+
+
 class Clusters(object):
     """ Clusters class represents a collection of clusters specified in the benchmarking file """
 

@@ -5,13 +5,13 @@ class Database(object):
  	def __init__(self):
 		conn = sqlite3.connect('self.db')
 		c = conn.cursor()		
-		c.execute("CREATE TABLE IF NOT EXISTS self(cluster text, cloud text, instance text, launch integer)")
+		c.execute("CREATE TABLE IF NOT EXISTS self(cluster text, cloud text, instance text, launch integer, benchmark text)")
 		conn.close()
 
-	def add(self,cluster_name,cloud_name,instance_id):
+	def add(self,cluster_name,cloud_name,instance_id,benchmark):
 		conn = sqlite3.connect('self.db')
 		c = conn.cursor()
-		c.execute("INSERT INTO self VALUES (?,?,?,?)",(cluster_name,cloud_name,instance_id,1))
+		c.execute("INSERT INTO self VALUES (?,?,?,?,?)",(cluster_name,cloud_name,instance_id,1,benchmark))
 		conn.commit()
 
 		conn.close()
@@ -28,6 +28,17 @@ class Database(object):
 		c.execute('SELECT * FROM self WHERE instance=?', [instance_id])
 		row = c.fetchone()
 		if row[0]==cluster and row[3]==1:
+			conn.close()
+			return True
+		conn.close()
+		return False
+	
+	def check_benchmark(self,benchmark,instance_id):
+		conn = sqlite3.connect('self.db')
+		c = conn.cursor()
+		c.execute('SELECT * FROM self WHERE instance=?', [instance_id])
+		row = c.fetchone()
+		if row[4]==benchmark and row[3]==1:
 			conn.close()
 			return True
 		conn.close()
@@ -72,13 +83,13 @@ class Database(object):
 			a = 0
 		for cluster in clusters:
 			print ""
-			print "Cluster: "+cluster[0][0][0]
+			print "Cluster: "+cluster[0][0][0]+" ("+cluster[0][0][4]+")"
 			for cloud in cluster:
-				print cloud[0][1]+":"
+				print "	"+cloud[0][1]+":"
 				for instance in cloud:
 					if instance[3]==1:
-						print instance[2]+" (running)"
+						print "		"+instance[2]+" (running)"
 					else:
-						print instance[2]+" (terminated)"
+						print "		"+instance[2]+" (terminated)"
 		conn.close()
 
