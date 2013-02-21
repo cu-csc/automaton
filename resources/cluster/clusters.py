@@ -122,10 +122,12 @@ class Cluster(object):
                         os.makedirs(local_path)
                     for path in self.path:
                         com = "scp "+ssh_username+"@"+instance.public_dns_name+":"+ path +" "+local_path
-                        print com
+                        print "[%s] download %s into %s" % (self.benchmark.name,os.path.basename(path),local_path)
                         command = Command(com)
                         a = command.execute()
-                        print a
+                        if a != 0:
+                            print command.stdout
+                            print command.stderr
 
 
 class Clusters(object):
