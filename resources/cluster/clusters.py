@@ -1,6 +1,7 @@
 # coding=utf-8
 import logging
 import sqlite3
+import os
 
 from resources.cloud.clouds import Cloud, Clouds
 from resources.cluster.database import Database
@@ -107,11 +108,7 @@ class Cluster(object):
 
     def download_logs(self):
         reservations = list()
-        local_path = "./log_files/"
-        local_path = local_path + self.benchmark.name
-        l = local_path
-        command = Command("mkdir -p "+local_path)
-        command.execute()
+        ssh_username = self.config.globals.ssh_username
         if self.reservations:
             reservations = self.reservations
         else:
@@ -120,14 +117,15 @@ class Cluster(object):
         for reservation in reservations:
             for instance in reservation.instances:
                 if self.database.check_benchmark(self.benchmark.name,instance.id):
-                    local_path = l+"/"+instance.id
-                    command = Command("mkdir -p "+local_path)
-                    command.execute()
+                    local_path = os.path.join(self.config.globals.log_local_path,self.benchmark.name,instance.id)
+                    if not os.path.exists(local_path):
+                        os.makedirs(local_path)
                     for path in self.path:
-                        com = "scp suiy@"+instance.ip_address+" "+ path +" "+local_path
+                        com = "scp "+ssh_username+"@"+instance.public_dns_name+":"+ path +" "+local_path
                         print com
                         command = Command(com)
-                        command.execute()
+                        a = command.execute()
+                        print a
 
 
 class Clusters(object):

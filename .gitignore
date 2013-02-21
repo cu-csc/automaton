@@ -28,3 +28,4 @@ pip-log.txt
 
 #PyCharm
 .idea
+.DS_Store

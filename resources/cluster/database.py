@@ -83,13 +83,13 @@ class Database(object):
 			a = 0
 		for cluster in clusters:
 			print ""
-			print "Cluster: "+cluster[0][0][0]+" ("+cluster[0][0][4]+")"
+			print 'Cluster: %s (%s)' % (cluster[0][0][0],cluster[0][0][4])
 			for cloud in cluster:
-				print "	"+cloud[0][1]+":"
+				print "\t%s:" % cloud[0][1]
 				for instance in cloud:
 					if instance[3]==1:
-						print "		"+instance[2]+" (running)"
+						print "\t\t%s (running)" % instance[2]
 					else:
-						print "		"+instance[2]+" (terminated)"
+						print "\t\t%s (terminated)" % instance[2]
 		conn.close()
 

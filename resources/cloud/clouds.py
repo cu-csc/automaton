@@ -1,7 +1,5 @@
 import logging
 import os
-import shutil
-import os.path
 
 from boto.ec2.connection import EC2Connection
 from boto.ec2.regioninfo import RegionInfo
