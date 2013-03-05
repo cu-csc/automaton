@@ -63,7 +63,7 @@ class RemoteCommand(object):
                 disable_known_hosts=True,
                 linewise=True,
                 warn_only=True,
-                abort_on_prompts=True,
+                abort_on_prompts=False,
                 always_use_pty=True,
                 timeout=5)
 
@@ -116,7 +116,7 @@ def parse_options():
 
     parser.add_option("-t", "--terminate_cluster", action="store",dest="terminate_cluster",help="Terminate specific instance, arguement: all/instance_id",default = False)
 
-    parser.add_option("-s", "--deploy_software", action="store",dest="deploy_software",help="Deploy Software")
+    parser.add_option("-s", "--deploy_software", action="store_true",dest="deploy_software",help="Deploy Software")
     
     parser.add_option("-e", "--excute_benchmarks", action="store",dest="excute_benchmarks",help="excute benchmarks")
     

@@ -1,11 +1,11 @@
-# coding=utf-8
+print# coding=utf-8
 import logging
 import sqlite3
 import os
 
 from resources.cloud.clouds import Cloud, Clouds
 from resources.cluster.database import Database
-from lib.util import read_path,Command
+from lib.util import read_path,Command,RemoteCommand,check_port_status
 
 LOG = logging.getLogger(__name__)
 
@@ -32,6 +32,10 @@ class Cluster(object):
         for option in self.benchmark.dict:
             if(option=="log_files"):
                 self.path = read_path(self.benchmark.dict[option])
+            elif(option == "url"):
+                self.url = self.benchmark.dict[option]
+            elif(option == "remote_location"):
+                self.remote_location = self.benchmark.dict[option]
             else:
                 cloud = avail_clouds.lookup_by_name(option)
                 request = int(self.benchmark.dict[option])
@@ -122,13 +126,40 @@ class Cluster(object):
                         os.makedirs(local_path)
                     for path in self.path:
                         com = "scp "+ssh_username+"@"+instance.public_dns_name+":"+ path +" "+local_path
-                        print "[%s] download %s into %s" % (self.benchmark.name,os.path.basename(path),local_path)
+                        LOG.debug("Download logs: [%s] download %s into %s" % (self.benchmark.name,os.path.basename(path),local_path))
                         command = Command(com)
-                        a = command.execute()
-                        if a != 0:
-                            print command.stdout
-                            print command.stderr
-
+                        command_return = command.execute()
+                        if command_return != 0:
+                            LOG.debug("Download logs: "+command.stdout)
+                            LOG.debug("Download logs: "+command.stderr)
+    
+    def deploy_software(self):
+        ssh_priv_key = self.config.globals.ssh_priv_key
+        ssh_username = self.config.globals.ssh_username
+        reservations = list()    
+        if self.reservations:
+            reservations = self.reservations
+        else:
+            for cloud in self.clouds:
+                reservations = cloud.conn.get_all_instances()
+        for reservation in reservations:
+            for instance in reservation.instances:
+                if self.database.check_benchmark(self.benchmark.name,instance.id):
+                    while not check_port_status(instance.ip_address,22,2):
+                        continue
+                    cmds = list()
+                    cmds.append("wget %s" % (self.url))
+                    cmds.append("apt-get update")
+                    cmds.append("apt-get install unzip")
+                    cmds.append("unzip BioPerf.zip")
+                    cmds.append("sed -i 's/read BIOPERF/#read BIOPERF/g' install-BioPerf.sh")
+                    cmds.append("./install-BioPerf.sh")
+                    for c in cmds:
+                        command = RemoteCommand(instance.public_dns_name,ssh_priv_key,c)
+                        command.execute()
+                        LOG.debug("Deploy_software: "+command.stdout)
+                        LOG.debug("Deploy_software: "+command.stderr)
+                
 
 class Clusters(object):
     """ Clusters class represents a collection of clusters specified in the benchmarking file """

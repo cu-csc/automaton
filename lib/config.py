@@ -9,6 +9,7 @@ class GlobalConfig(object):
         default_dict = self.config.defaults()
         self.key_name = default_dict['key_name']
         self.key_path = default_dict['key_path']
+        self.ssh_priv_key = default_dict['ssh_priv_key']
         self.log_local_path = default_dict['log_local_path']
         self.ssh_username = default_dict['ssh_username']
 
