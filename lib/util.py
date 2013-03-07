@@ -8,7 +8,6 @@ from ConfigParser import SafeConfigParser
 from optparse import OptionParser
 from fabric import api as fabric_api
 
-
 LOG = logging.getLogger(__name__)
 
 

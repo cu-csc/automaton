@@ -2,10 +2,11 @@ print# coding=utf-8
 import logging
 import sqlite3
 import os
+import datetime
 
 from resources.cloud.clouds import Cloud, Clouds
 from resources.cluster.database import Database
-from lib.util import read_path,Command,RemoteCommand,check_port_status
+from lib.util import read_path, Command, RemoteCommand, check_port_status
 
 LOG = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ class Cluster(object):
     (both references and section names are case-sensitive).
 
     """
-    def __init__(self, config, avail_clouds, benchmark,cluster_name,database):
+    def __init__(self, config, avail_clouds, benchmark, cluster_name, database):
         self.config = config
         self.benchmark = benchmark
         self.name = cluster_name
@@ -30,7 +31,7 @@ class Cluster(object):
         self.path = list()
         self.database = database
         for option in self.benchmark.dict:
-            if(option=="log_files"):
+            if(option == "log_files"):
                 self.path = read_path(self.benchmark.dict[option])
             elif(option == "url"):
                 self.url = self.benchmark.dict[option]
@@ -60,7 +61,7 @@ class Cluster(object):
                 reservation = self.clouds[i].boot_image()
                 self.reservations.append(reservation)
                 for instance in reservation.instances:
-                    self.database.add(self.name,self.clouds[i].name,instance.id,self.benchmark.name)
+                    self.database.add(self.name, self.clouds[i].name, instance.id, self.benchmark.name)
 
     def log_info(self):
         """ Loops through reservations and logs status information for every instance """
@@ -96,7 +97,7 @@ class Cluster(object):
                 self.database.terminate(instance.id)
                 LOG.debug("Terminated instance: " + instance.id)
 
-    def terminate(self,cluster):
+    def terminate(self, cluster):
         reservations = list()
         if self.reservations:
             reservations = self.reservations
@@ -105,7 +106,7 @@ class Cluster(object):
                 reservations = cloud.conn.get_all_instances()
         for reservation in reservations:
             for instance in reservation.instances:
-                if self.database.check(cluster,instance.id):
+                if self.database.check(cluster, instance.id):
                     instance.terminate()
                     self.database.terminate(instance.id)
                     LOG.debug("Terminated instance: " + instance.id)
@@ -120,23 +121,24 @@ class Cluster(object):
                 reservations = cloud.conn.get_all_instances()
         for reservation in reservations:
             for instance in reservation.instances:
-                if self.database.check_benchmark(self.benchmark.name,instance.id):
-                    local_path = os.path.join(self.config.globals.log_local_path,self.benchmark.name,instance.id)
+                if self.database.check_benchmark(self.benchmark.name, instance.id):
+                    local_path = os.path.join(self.config.globals.log_local_path, self.benchmark.name, instance.id)
                     if not os.path.exists(local_path):
                         os.makedirs(local_path)
                     for path in self.path:
                         com = "scp "+ssh_username+"@"+instance.public_dns_name+":"+ path +" "+local_path
-                        LOG.debug("Download logs: [%s] download %s into %s" % (self.benchmark.name,os.path.basename(path),local_path))
+                        LOG.debug("Download logs: [%s] download %s into %s" % (self.benchmark.name, os.path.basename(path), local_path))
                         command = Command(com)
                         command_return = command.execute()
                         if command_return != 0:
                             LOG.debug("Download logs: "+command.stdout)
-                            LOG.debug("Download logs: "+command.stderr)
+                            LOG.error("Download logs error: "+command.stderr)
     
     def deploy_software(self):
         ssh_priv_key = self.config.globals.ssh_priv_key
         ssh_username = self.config.globals.ssh_username
-        reservations = list()    
+        reservations = list()   
+        not_available = 0;
         if self.reservations:
             reservations = self.reservations
         else:
@@ -144,9 +146,17 @@ class Cluster(object):
                 reservations = cloud.conn.get_all_instances()
         for reservation in reservations:
             for instance in reservation.instances:
-                if self.database.check_benchmark(self.benchmark.name,instance.id):
-                    while not check_port_status(instance.ip_address,22,2):
-                        continue
+                if self.database.check_benchmark(self.benchmark.name, instance.id):
+                    starttime = datetime.datetime.now()
+                    while not check_port_status(instance.ip_address, 22, 2):
+                        endtime = datetime.datetime.now()
+                        if ((endtime-starttime).seconds)>120:
+                            LOG.info("Deploy_software: the port 22 is not available right now. please try it later")
+                            not_available = 1
+                            break
+                    if not_available:
+                        not_available = 0
+                        break
                     cmds = list()
                     cmds.append("wget %s" % (self.url))
                     cmds.append("apt-get update")
@@ -155,10 +165,11 @@ class Cluster(object):
                     cmds.append("sed -i 's/read BIOPERF/#read BIOPERF/g' install-BioPerf.sh")
                     cmds.append("./install-BioPerf.sh")
                     for c in cmds:
-                        command = RemoteCommand(instance.public_dns_name,ssh_priv_key,c)
-                        command.execute()
-                        LOG.debug("Deploy_software: "+command.stdout)
-                        LOG.debug("Deploy_software: "+command.stderr)
+                        command = RemoteCommand(instance.public_dns_name, ssh_priv_key, c)
+                        command_return = command.execute()
+                        if command_return !=0:
+                            LOG.debug("Deploy_software: "+command.stdout)
+                            LOG.error("Deploy_software error: "+command.stderr)
                 
 
 class Clusters(object):
@@ -174,5 +185,5 @@ class Clusters(object):
             a=a+1
             LOG.debug("Creating cluster for benchmark: " + benchmark.name)
             cluster_name = "cluster-"+str(self.database.countcluster()+a)
-            self.list.append(Cluster(self.config, avail_clouds, benchmark,cluster_name,self.database))
+            self.list.append(Cluster(self.config, avail_clouds, benchmark, cluster_name, self.database))
     
