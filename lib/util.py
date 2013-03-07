@@ -62,7 +62,7 @@ class RemoteCommand(object):
                 disable_known_hosts=True,
                 linewise=True,
                 warn_only=True,
-                abort_on_prompts=False,
+                abort_on_prompts=True,
                 always_use_pty=True,
                 timeout=5)
 

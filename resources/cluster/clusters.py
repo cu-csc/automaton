@@ -159,8 +159,8 @@ class Cluster(object):
                         break
                     cmds = list()
                     cmds.append("wget %s" % (self.url))
-                    cmds.append("apt-get update")
-                    cmds.append("apt-get install unzip")
+                    #cmds.append("apt-get update")
+                    #cmds.append("apt-get install unzip")
                     cmds.append("unzip BioPerf.zip")
                     cmds.append("sed -i 's/read BIOPERF/#read BIOPERF/g' install-BioPerf.sh")
                     cmds.append("./install-BioPerf.sh")
