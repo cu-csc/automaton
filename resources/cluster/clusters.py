@@ -1,4 +1,3 @@
-print# coding=utf-8
 import logging
 import sqlite3
 import os
@@ -126,17 +125,21 @@ class Cluster(object):
                     if not os.path.exists(local_path):
                         os.makedirs(local_path)
                     for path in self.path:
-                        com = "scp "+ssh_username+"@"+instance.public_dns_name+":"+ path +" "+local_path
+                        file_name = os.path.basename(path)
+                        local_path = os.path.join(local_path,file_name)
+                        local_path = local_path+'.'+(datetime.datetime.now()).strftime("%H%M%S")  
+                        com = "scp -r "+ssh_username+"@"+instance.public_dns_name+":"+path+" "+local_path
                         LOG.debug("Download logs: [%s] download %s into %s" % (self.benchmark.name, os.path.basename(path), local_path))
                         command = Command(com)
                         command_return = command.execute()
                         if command_return != 0:
-                            LOG.debug("Download logs: "+command.stdout)
+                            LOG.error("Download logs: "+command.stdout)
                             LOG.error("Download logs error: "+command.stderr)
     
     def deploy_software(self):
         ssh_priv_key = self.config.globals.ssh_priv_key
         ssh_username = self.config.globals.ssh_username
+        ssh_timeout = int(self.config.globals.ssh_timeout)
         reservations = list()   
         not_available = 0;
         if self.reservations:
@@ -147,16 +150,9 @@ class Cluster(object):
         for reservation in reservations:
             for instance in reservation.instances:
                 if self.database.check_benchmark(self.benchmark.name, instance.id):
-                    starttime = datetime.datetime.now()
-                    while not check_port_status(instance.ip_address, 22, 2):
-                        endtime = datetime.datetime.now()
-                        if ((endtime-starttime).seconds)>120:
-                            LOG.info("Deploy_software: the port 22 is not available right now. please try it later")
-                            not_available = 1
-                            break
-                    if not_available:
-                        not_available = 0
-                        break
+                    if not check_port_status(instance.ip_address, 22, ssh_timeout):
+                        LOG.error("Deploy_software: the port 22 is not available right now. please try it later")
+                        continue   
                     cmds = list()
                     cmds.append("wget %s" % (self.url))
                     #cmds.append("apt-get update")
@@ -168,9 +164,38 @@ class Cluster(object):
                         command = RemoteCommand(instance.public_dns_name, ssh_priv_key, c)
                         command_return = command.execute()
                         if command_return !=0:
-                            LOG.debug("Deploy_software: "+command.stdout)
+                            LOG.error("Deploy_software: "+command.stdout)
                             LOG.error("Deploy_software error: "+command.stderr)
                 
+    def excute_benchmarks(self):
+        ssh_priv_key = self.config.globals.ssh_priv_key
+        ssh_username = self.config.globals.ssh_username
+        reservations = list()   
+        if self.reservations:
+            reservations = self.reservations
+        else:
+            for cloud in self.clouds:
+                reservations = cloud.conn.get_all_instances()
+        for reservation in reservations:
+            for instance in reservation.instances:
+                if self.database.check_benchmark(self.benchmark.name, instance.id):
+                    cmds = list()
+                    cmds.append("sed -i '5c input='y'' ~/BioPerf/Scripts/Run-scripts/CleanOutputs.sh")
+                    cmds.append("sed -i '13c rm -f $BIOPERF/Outputs/log' ~/BioPerf/Scripts/Run-scripts/CleanOutputs.sh")
+                    cmds.append("sed -i '21c #' ~/BioPerf/Scripts/Run-scripts/run-bioperf.sh")
+                    cmds.append("sed -i '26c #' ~/BioPerf/Scripts/Run-scripts/run-bioperf.sh")
+                    cmds.append("sed -i '10c arch='X'' ~/BioPerf/Scripts/Run-scripts/run-bioperf.sh")
+                    cmds.append("sed -i '71c input3='A'' ~/BioPerf/Scripts/Run-scripts/run-bioperf.sh")
+                    cmds.append("sed -i '134c input='A'' ~/BioPerf/Scripts/Run-scripts/run-bioperf.sh")
+                    cmds.append("sed -i '145c user1='y'' ~/BioPerf/Scripts/Run-scripts/run-bioperf.sh")
+                    cmds.append("./BioPerf/Scripts/Run-scripts/CleanOutputs.sh")
+                    cmds.append("echo 'Y' 'Y'|./BioPerf/Scripts/Run-scripts/run-bioperf.sh > ~/BioPerf/Outputs/log")
+                    
+                    for c in cmds:
+                        command = RemoteCommand(instance.public_dns_name, ssh_priv_key, c)
+                        command_return = command.execute()
+                        print command.stdout
+                        print command.stderr
 
 class Clusters(object):
     """ Clusters class represents a collection of clusters specified in the benchmarking file """

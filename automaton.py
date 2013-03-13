@@ -54,6 +54,9 @@ class Automaton(Thread):
             if self.config.options.deploy_software:
                 cluster.connect()
                 cluster.deploy_software()
+            if self.config.options.excute_benchmarks:
+                cluster.connect()
+                cluster.excute_benchmarks()
             
 def clean_exit(signum, frame):
     global SIGEXIT

@@ -12,6 +12,7 @@ class GlobalConfig(object):
         self.ssh_priv_key = default_dict['ssh_priv_key']
         self.log_local_path = default_dict['log_local_path']
         self.ssh_username = default_dict['ssh_username']
+        self.ssh_timeout = default_dict['ssh_timeout']
 
 class CloudsConfig(object):
     """ CloudsConfig class retrieves information from the file that specifies global parameters """

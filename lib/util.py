@@ -3,6 +3,7 @@ import subprocess
 import socket
 import tempfile
 import os
+import datetime
 
 from ConfigParser import SafeConfigParser
 from optparse import OptionParser
@@ -62,7 +63,7 @@ class RemoteCommand(object):
                 disable_known_hosts=True,
                 linewise=True,
                 warn_only=True,
-                abort_on_prompts=True,
+                abort_on_prompts=False,
                 always_use_pty=True,
                 timeout=5)
 
@@ -117,7 +118,7 @@ def parse_options():
 
     parser.add_option("-s", "--deploy_software", action="store_true",dest="deploy_software",help="Deploy Software")
     
-    parser.add_option("-e", "--excute_benchmarks", action="store",dest="excute_benchmarks",help="excute benchmarks")
+    parser.add_option("-e", "--excute_benchmarks", action="store_true",dest="excute_benchmarks",help="excute benchmarks")
     
     parser.add_option("-o", "--gather_logs", action="store_true",dest="gather_logs",help="Gather logs")
 
@@ -129,7 +130,7 @@ def parse_options():
 
     return (options, args)
 
-def check_port_status(address, port=22, timeout=2):
+def check_port_status(address, port=22, timeout=2, status_timeout=60):
     """Check weather a remote port is accepting connection.
 
     Given a port and an address, we establish a socket connection
@@ -146,19 +147,23 @@ def check_port_status(address, port=22, timeout=2):
             False : if port is not accepting
 
     """
-
-    default_timeout = socket.getdefaulttimeout()
-    socket.setdefaulttimeout(timeout)
-    remote_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    try:
-        remote_socket.connect((address, port))
-    except Exception as inst:
-        LOG.debug("Exception in check_port_status : %s" % (str(inst)))
-        return False
-    finally:
-        remote_socket.close()
-        socket.setdefaulttimeout(default_timeout)
-    return True
+    starttime = datetime.datetime.now()
+    endtime = starttime
+    while ((endtime-starttime).seconds)<status_timeout:
+        default_timeout = socket.getdefaulttimeout()
+        socket.setdefaulttimeout(timeout)
+        remote_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            remote_socket.connect((address, port))
+        except Exception as inst:
+            LOG.debug("Exception in check_port_status : %s" % (str(inst)))
+            endtime = datetime.datetime.now()
+            continue
+        finally:
+            remote_socket.close()
+            socket.setdefaulttimeout(default_timeout)
+        return True
+    return False
 
 def clone_git_repo(repo_src):
     """Clone a git repo
