@@ -20,6 +20,7 @@ class Cloud(object):
         self.cloud_port = int(self.cloud_config.get(self.name, "cloud_port"))
         self.cloud_type = self.cloud_config.get(self.name, "cloud_type")
         self.image_id = self.cloud_config.get(self.name, "image_id")
+        self.instance_type = self.cloud_config.get(self.name, "instance_type")
         self.access_var = self.cloud_config.get(self.name, "access_id").strip('$')
         self.secret_var = self.cloud_config.get(self.name, "secret_key").strip('$')
         self.access_id = os.environ[self.access_var]
@@ -60,7 +61,7 @@ class Cloud(object):
             LOG.debug("Key \"%s\" is already registered" % (self.config.globals.key_name))
 
         image_object = self.conn.get_image(self.image_id)
-        boot_result = image_object.run(key_name=self.config.globals.key_name)
+        boot_result = image_object.run(key_name=self.config.globals.key_name,instance_type=self.instance_type)
         LOG.debug("Attempted to boot an instance. Result: %s" % (boot_result))
         return boot_result
 

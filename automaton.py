@@ -10,6 +10,7 @@ from lib.util import read_config
 from lib.config import Config
 from resources.cloud.clouds import Cloud, Clouds
 from resources.cluster.clusters import Clusters
+from graphing.graphing import Graph
 
 SIGEXIT = False
 LOG = logging.getLogger(__name__)
@@ -36,8 +37,10 @@ class Automaton(Thread):
             #cluster.terminate_all()
             #print "terminate"
         if self.config.options.show_id:
-                self.clusters.database.printdata();
-
+            self.clusters.database.printdata()
+        if self.config.options.generate_graphs:
+            graph = Graph(self.config)
+            graph.generate_graph()
         for cluster in self.clusters.list:
             if self.config.options.launch_cluster:
                 cluster.connect()

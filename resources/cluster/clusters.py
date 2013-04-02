@@ -3,6 +3,7 @@ import sqlite3
 import os
 import datetime
 
+
 from resources.cloud.clouds import Cloud, Clouds
 from resources.cluster.database import Database
 from lib.util import read_path, Command, RemoteCommand, check_port_status
@@ -127,7 +128,7 @@ class Cluster(object):
                     for path in self.path:
                         file_name = os.path.basename(path)
                         local_path = os.path.join(local_path,file_name)
-                        local_path = local_path+'.'+(datetime.datetime.now()).strftime("%H%M%S")  
+                        local_path = local_path+'_'+(datetime.datetime.now()).strftime("%H%M%S")+'_'+instance.instance_type
                         com = "scp -r "+ssh_username+"@"+instance.public_dns_name+":"+path+" "+local_path
                         LOG.debug("Download logs: [%s] download %s into %s" % (self.benchmark.name, os.path.basename(path), local_path))
                         command = Command(com)
@@ -194,8 +195,9 @@ class Cluster(object):
                     for c in cmds:
                         command = RemoteCommand(instance.public_dns_name, ssh_priv_key, c)
                         command_return = command.execute()
-                        print command.stdout
-                        print command.stderr
+                        if command_return !=0:
+                            LOG.error("Excute_benchmarks: "+command.stdout)
+                            LOG.error("Excute_benchmarks: "+command.stderr)
 
 class Clusters(object):
     """ Clusters class represents a collection of clusters specified in the benchmarking file """

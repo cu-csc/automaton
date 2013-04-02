@@ -122,7 +122,7 @@ def parse_options():
     
     parser.add_option("-o", "--gather_logs", action="store_true",dest="gather_logs",help="Gather logs")
 
-    parser.add_option("-p", "--generate_graphs", action="store_false",dest="verbose",help="Generate graphs that based on the collected logs")
+    parser.add_option("-p", "--generate_graphs", action="store_true",dest="generate_graphs",help="Generate graphs that based on the collected logs")
 
     parser.add_option("-i", "--show_id", action="store_true",dest="show_id",help="show the id of all running instances")
     
