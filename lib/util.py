@@ -119,7 +119,7 @@ def parse_options():
 
     parser.add_option("-s", "--deploy_software", action="store_true",dest="deploy_software",help="Deploy Software")
     
-    parser.add_option("-e", "--excute_benchmarks", action="store",dest="excute_benchmarks",help="excute benchmarks, arguement: small/medium/large")
+    parser.add_option("-e", "--excute_benchmarks", action="store_true",dest="excute_benchmarks",help="excute benchmarks")
     
     parser.add_option("-o", "--gather_logs", action="store_true",dest="gather_logs",help="Gather logs")
 
