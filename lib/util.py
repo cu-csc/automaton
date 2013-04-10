@@ -94,6 +94,7 @@ def read_config(file):
 
 
 def parse_options():
+
     parser = OptionParser()
 
     parser.add_option("-d", "--debug", action="store_true", dest="debug",
@@ -118,14 +119,13 @@ def parse_options():
 
     parser.add_option("-s", "--deploy_software", action="store_true",dest="deploy_software",help="Deploy Software")
     
-    parser.add_option("-e", "--excute_benchmarks", action="store_true",dest="excute_benchmarks",help="excute benchmarks")
+    parser.add_option("-e", "--excute_benchmarks", action="store",dest="excute_benchmarks",help="excute benchmarks, arguement: small/medium/large")
     
     parser.add_option("-o", "--gather_logs", action="store_true",dest="gather_logs",help="Gather logs")
 
     parser.add_option("-p", "--generate_graphs", action="store_true",dest="generate_graphs",help="Generate graphs that based on the collected logs")
 
     parser.add_option("-i", "--show_id", action="store_true",dest="show_id",help="show the id of all running instances")
-    
     (options, args) = parser.parse_args()
 
     return (options, args)

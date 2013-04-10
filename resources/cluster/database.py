@@ -92,4 +92,3 @@ class Database(object):
 					else:
 						print "\t\t%s (terminated)" % instance[2]
 		conn.close()
-

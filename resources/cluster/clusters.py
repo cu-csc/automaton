@@ -213,4 +213,3 @@ class Clusters(object):
             LOG.debug("Creating cluster for benchmark: " + benchmark.name)
             cluster_name = "cluster-"+str(self.database.countcluster()+a)
             self.list.append(Cluster(self.config, avail_clouds, benchmark, cluster_name, self.database))
-    
