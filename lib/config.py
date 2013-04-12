@@ -1,3 +1,4 @@
+
 from lib.util import read_config
 
 class GlobalConfig(object):
@@ -8,6 +9,11 @@ class GlobalConfig(object):
         default_dict = self.config.defaults()
         self.key_name = default_dict['key_name']
         self.key_path = default_dict['key_path']
+        self.ssh_priv_key = default_dict['ssh_priv_key']
+        self.log_local_path = default_dict['log_local_path']
+        self.ssh_username = default_dict['ssh_username']
+        self.ssh_timeout = default_dict['ssh_timeout']
+        self.graph_path  = default_dict['graph_path']
 
 class CloudsConfig(object):
     """ CloudsConfig class retrieves information from the file that specifies global parameters """
@@ -41,6 +47,7 @@ class Config(object):
     """ Config class retrieves all configuration information """
 
     def __init__(self, options):
+        self.options = options
         self.globals = GlobalConfig(read_config(options.global_file))
         self.clouds = CloudsConfig(read_config(options.clouds_file))
         self.benchmarking = BenchmarkingConfig(read_config(options.benchmarking_file))

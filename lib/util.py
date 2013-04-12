@@ -3,11 +3,11 @@ import subprocess
 import socket
 import tempfile
 import os
+import datetime
 
 from ConfigParser import SafeConfigParser
 from optparse import OptionParser
 from fabric import api as fabric_api
-
 
 LOG = logging.getLogger(__name__)
 
@@ -63,7 +63,7 @@ class RemoteCommand(object):
                 disable_known_hosts=True,
                 linewise=True,
                 warn_only=True,
-                abort_on_prompts=True,
+                abort_on_prompts=False,
                 always_use_pty=True,
                 timeout=5)
 
@@ -94,6 +94,7 @@ def read_config(file):
 
 
 def parse_options():
+
     parser = OptionParser()
 
     parser.add_option("-d", "--debug", action="store_true", dest="debug",
@@ -112,10 +113,24 @@ def parse_options():
                       help="Location of the file with benchmarking parameters (default: etc/benchmarking.conf).")
     parser.set_defaults(benchmarking_file="etc/benchmarking.conf")
 
+    parser.add_option("-l", "--launch_cluster", action="store_true",dest="launch_cluster",help="Launch desired number of clusters")
+
+    parser.add_option("-t", "--terminate_cluster", action="store",dest="terminate_cluster",help="Terminate specific instance, arguement: all/instance_id",default = False)
+
+    parser.add_option("-s", "--deploy_software", action="store_true",dest="deploy_software",help="Deploy Software")
+    
+    parser.add_option("-e", "--excute_benchmarks", action="store_true",dest="excute_benchmarks",help="excute benchmarks")
+    
+    parser.add_option("-o", "--gather_logs", action="store_true",dest="gather_logs",help="Gather logs")
+
+    parser.add_option("-p", "--generate_graphs", action="store_true",dest="generate_graphs",help="Generate graphs that based on the collected logs")
+
+    parser.add_option("-i", "--show_id", action="store_true",dest="show_id",help="show the id of all running instances")
     (options, args) = parser.parse_args()
+
     return (options, args)
 
-def check_port_status(address, port=22, timeout=2):
+def check_port_status(address, port=22, timeout=2, status_timeout=60):
     """Check weather a remote port is accepting connection.
 
     Given a port and an address, we establish a socket connection
@@ -132,19 +147,23 @@ def check_port_status(address, port=22, timeout=2):
             False : if port is not accepting
 
     """
-
-    default_timeout = socket.getdefaulttimeout()
-    socket.setdefaulttimeout(timeout)
-    remote_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    try:
-        remote_socket.connect((address, port))
-    except Exception as inst:
-        LOG.debug("Exception in check_port_status : %s" % (str(inst)))
-        return False
-    finally:
-        remote_socket.close()
-        socket.setdefaulttimeout(default_timeout)
-    return True
+    starttime = datetime.datetime.now()
+    endtime = starttime
+    while ((endtime-starttime).seconds)<status_timeout:
+        default_timeout = socket.getdefaulttimeout()
+        socket.setdefaulttimeout(timeout)
+        remote_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            remote_socket.connect((address, port))
+        except Exception as inst:
+            LOG.debug("Exception in check_port_status : %s" % (str(inst)))
+            endtime = datetime.datetime.now()
+            continue
+        finally:
+            remote_socket.close()
+            socket.setdefaulttimeout(default_timeout)
+        return True
+    return False
 
 def clone_git_repo(repo_src):
     """Clone a git repo
@@ -174,3 +193,9 @@ def is_executable_file(file_path):
 
     """
     return os.path.isfile(file_path) and os.access(file_path, os.X_OK)
+
+def read_path(path_src):
+    if len(path_src and ',')==1:
+        path_src = path_src.replace(' ', '').replace('\n', '')
+        paths = path_src.split(",")
+        return paths
