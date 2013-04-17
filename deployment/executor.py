@@ -18,9 +18,11 @@ class Executor(object):
         cmds_in_run_level = self.staged_dict[run_level]
 
         for command in cmds_in_run_level:
-            remote_command = util.RemoteCommand(self.hostname, self.private_key, command)
+            remote_command = util.RemoteCommand(self.hostname,
+                                                self.private_key, command)
             return_code = remote_command.execute()
-            result_dict[command] = (return_code, remote_command.stdout, remote_command.stderr)
+            result_dict[command] = (return_code, remote_command.stdout,
+                                    remote_command.stderr)
 
             if return_code != 0:
                 break

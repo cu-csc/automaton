@@ -15,6 +15,7 @@ import unittest
 from lib import util
 from deployment import common
 
+
 class test_deployment_functions(unittest.TestCase):
 
     def setUp(self):
@@ -28,21 +29,21 @@ class test_deployment_functions(unittest.TestCase):
         # ssh port
         self.assertTrue(util.check_port_status("research.cs.colorado.edu"))
         # http port
-        self.assertTrue(util.check_port_status("google.com",80,2))
+        self.assertTrue(util.check_port_status("google.com", 80, 2))
         # wrong domain
         self.assertFalse(util.check_port_status("Idonotexistwallah.wrong"))
         # wrong ip
         self.assertFalse(util.check_port_status("256.256.256.256"))
 
-
     def test_run_remote_command(self):
         result = util.RemoteCommand(self.testing_machine,
-            self.key_filename, "grep ewrqwerasdfqewr /etc/passwd").execute()
-        self.assertNotEqual(result,0)
+                                    self.key_filename, "grep "
+                                    "ewrqwerasdfqewr /etc/passwd").execute()
+        self.assertNotEqual(result, 0)
 
-        result = util.RemoteCommand(self.testing_machine,
-            self.key_filename, "ls -al /etc/passwd").execute()
-        self.assertEqual(result,0)
+        result = util.RemoteCommand(self.testing_machine, self.key_filename,
+                                    "ls -al /etc/passwd").execute()
+        self.assertEqual(result, 0)
 
     def test_clone_git_repo(self):
         self.assertIsNotNone(util.clone_git_repo("https://github.com/alal3177/automaton.git"))

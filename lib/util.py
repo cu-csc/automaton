@@ -30,8 +30,9 @@ class Command(object):
 class RemoteCommand(object):
     """Run a command in a remote machine.
 
-    Given a machine address, a none interactive command and ssh key, the function uses fabric
-    to execute the command in the remote machines.
+    Given a machine address, a none interactive command and ssh key,
+    the function uses fabric to execute the command in the remote
+    machines.
 
     Args:
 
@@ -57,15 +58,18 @@ class RemoteCommand(object):
 
     def execute(self):
         if os.path.isfile(self.ssh_private_key):
-            context = fabric_api.settings(fabric_api.hide('running', 'stdout', 'stderr', 'warnings'),
-                user="root",
-                key_filename=[].append(self.ssh_private_key),
-                disable_known_hosts=True,
-                linewise=True,
-                warn_only=True,
-                abort_on_prompts=False,
-                always_use_pty=True,
-                timeout=5)
+            context = fabric_api.settings(fabric_api.hide('running',
+                                                          'stdout',
+                                                          'stderr',
+                                                          'warnings'),
+                                          user="root",
+                                          key_filename=[self.ssh_private_key],
+                                          disable_known_hosts=True,
+                                          linewise=True,
+                                          warn_only=True,
+                                          abort_on_prompts=False,
+                                          always_use_pty=True,
+                                          timeout=5)
 
         else:
             LOG.debug("Path to ssh private key is invalid")
@@ -80,7 +84,8 @@ class RemoteCommand(object):
                     self.stderr = results.stderr
                     return results.return_code
                 except Exception as expt:
-                    LOG.debug("Exception in running remote command: %s" % str(expt))
+                    LOG.debug("Exception in running remote command: %s" %
+                              str(expt))
                     return None
         else:
             LOG.debug("issue initializing fabric context")
@@ -101,34 +106,53 @@ def parse_options():
                       help="Enable debugging log level.")
     parser.set_defaults(debug=False)
 
-    parser.add_option("-g", "--global_file", action="store", dest="global_file",
-                      help="Location of the file with global parameters (default: etc/global.conf).")
+    parser.add_option("-g", "--global_file", action="store",
+                      dest="global_file",
+                      help="Location of the file with global parameters "
+                           "(default: etc/global.conf).")
     parser.set_defaults(global_file="etc/global.conf")
 
-    parser.add_option("-c", "--clouds_file", action="store", dest="clouds_file",
-                      help="Location of the file with cloud parameters (default: etc/clouds.conf).")
+    parser.add_option("-c", "--clouds_file", action="store",
+                      dest="clouds_file",
+                      help="Location of the file with cloud parameters "
+                           "(default: etc/clouds.conf).")
     parser.set_defaults(clouds_file="etc/clouds.conf")
 
-    parser.add_option("-b", "--benchmarking_file", action="store", dest="benchmarking_file",
-                      help="Location of the file with benchmarking parameters (default: etc/benchmarking.conf).")
+    parser.add_option("-b", "--benchmarking_file", action="store",
+                      dest="benchmarking_file",
+                      help="Location of the file with benchmarking "
+                           "parameters (default: etc/benchmarking.conf).")
     parser.set_defaults(benchmarking_file="etc/benchmarking.conf")
 
-    parser.add_option("-l", "--launch_cluster", action="store_true",dest="launch_cluster",help="Launch desired number of clusters")
+    parser.add_option("-l", "--launch_cluster", action="store_true",
+                      dest="launch_cluster",
+                      help="Launch desired number of clusters")
 
-    parser.add_option("-t", "--terminate_cluster", action="store",dest="terminate_cluster",help="Terminate specific instance, arguement: all/instance_id",default = False)
+    parser.add_option("-t", "--terminate_cluster", action="store",
+                      dest="terminate_cluster",
+                      help="Terminate specific instance, argument: "
+                           "all/instance_id",
+                      default=False)
 
-    parser.add_option("-s", "--deploy_software", action="store_true",dest="deploy_software",help="Deploy Software")
-    
-    parser.add_option("-e", "--excute_benchmarks", action="store_true",dest="excute_benchmarks",help="excute benchmarks")
-    
-    parser.add_option("-o", "--gather_logs", action="store_true",dest="gather_logs",help="Gather logs")
+    parser.add_option("-s", "--deploy_software", action="store_true",
+                      dest="deploy_software", help="Deploy Software")
 
-    parser.add_option("-p", "--generate_graphs", action="store_true",dest="generate_graphs",help="Generate graphs that based on the collected logs")
+    parser.add_option("-e", "--excute_benchmarks", action="store_true",
+                      dest="excute_benchmarks", help="excute benchmarks")
 
-    parser.add_option("-i", "--show_id", action="store_true",dest="show_id",help="show the id of all running instances")
+    parser.add_option("-o", "--gather_logs", action="store_true",
+                      dest="gather_logs", help="Gather logs")
+
+    parser.add_option("-p", "--generate_graphs", action="store_true",
+                      dest="generate_graphs",
+                      help="Generate graphs that based on the collected logs")
+
+    parser.add_option("-i", "--show_id", action="store_true", dest="show_id",
+                      help="show the id of all running instances")
     (options, args) = parser.parse_args()
 
     return (options, args)
+
 
 def check_port_status(address, port=22, timeout=2, status_timeout=60):
     """Check weather a remote port is accepting connection.
@@ -149,7 +173,7 @@ def check_port_status(address, port=22, timeout=2, status_timeout=60):
     """
     starttime = datetime.datetime.now()
     endtime = starttime
-    while ((endtime-starttime).seconds)<status_timeout:
+    while ((endtime-starttime).seconds) < status_timeout:
         default_timeout = socket.getdefaulttimeout()
         socket.setdefaulttimeout(timeout)
         remote_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -164,6 +188,7 @@ def check_port_status(address, port=22, timeout=2, status_timeout=60):
             socket.setdefaulttimeout(default_timeout)
         return True
     return False
+
 
 def clone_git_repo(repo_src):
     """Clone a git repo
@@ -182,6 +207,7 @@ def clone_git_repo(repo_src):
     if clone_cmd_obj.execute() == 0:
         return repo_dest
 
+
 def is_executable_file(file_path):
     """Check if a given file is executable
 
@@ -194,8 +220,9 @@ def is_executable_file(file_path):
     """
     return os.path.isfile(file_path) and os.access(file_path, os.X_OK)
 
+
 def read_path(path_src):
-    if len(path_src and ',')==1:
+    if len(path_src and ',') == 1:
         path_src = path_src.replace(' ', '').replace('\n', '')
         paths = path_src.split(",")
         return paths

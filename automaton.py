@@ -21,6 +21,7 @@ class Automaton(Thread):
         Thread.__init__(self)
         self.config = config
         self.clusters = clusters
+
     def run(self):
         LOG.info("Starting Automaton")
         #TODO(pdmars): do something
@@ -47,7 +48,7 @@ class Automaton(Thread):
                 cluster.launch()
             if self.config.options.terminate_cluster:
                 cluster.connect()
-                if self.config.options.terminate_cluster=="all":
+                if self.config.options.terminate_cluster == "all":
                     cluster.terminate_all()
                 else:
                     cluster.terminate(self.config.options.terminate_cluster)
@@ -60,20 +61,22 @@ class Automaton(Thread):
             if self.config.options.excute_benchmarks:
                 cluster.connect()
                 cluster.excute_benchmarks()
-            
+
+
 def clean_exit(signum, frame):
     global SIGEXIT
     SIGEXIT = True
     LOG.critical("Exit signal received. Exiting at the next sane time. "
                  "Please stand by.")
 
+
 def main():
     (options, args) = parse_options()
     configure_logging(options.debug)
-    
+
     config = Config(options)
     clusters = Clusters(config)
-    
+
     signal.signal(signal.SIGINT, clean_exit)
     automaton = Automaton(config, clusters)
     automaton.start()
