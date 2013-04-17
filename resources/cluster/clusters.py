@@ -148,8 +148,9 @@ class Cluster(object):
             for instance in reservation.instances:
                 if self.database.check_benchmark(self.benchmark.name,
                                                  instance.id):
-                    local_path = os.path.join(self.config.globals.log_local_path,
-                                              self.benchmark.name, instance.id)
+                    local_path = os.path.join(
+                        self.config.globals.log_local_path,
+                        self.benchmark.name, instance.id)
                     if not os.path.exists(local_path):
                         os.makedirs(local_path)
                     for path in self.path:
