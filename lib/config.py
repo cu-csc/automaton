@@ -69,4 +69,5 @@ class Config(object):
         self.options = options
         self.globals = GlobalConfig(read_config(options.global_file))
         self.clouds = CloudsConfig(read_config(options.clouds_file))
-        self.benchmarking = BenchmarkingConfig(read_config(options.benchmarking_file))
+        self.benchmarking = BenchmarkingConfig(read_config(
+            options.benchmarking_file))

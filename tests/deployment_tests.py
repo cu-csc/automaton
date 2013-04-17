@@ -46,7 +46,8 @@ class test_deployment_functions(unittest.TestCase):
         self.assertEqual(result, 0)
 
     def test_clone_git_repo(self):
-        self.assertIsNotNone(util.clone_git_repo("https://github.com/alal3177/automaton.git"))
+        self.assertIsNotNone(util.clone_git_repo("https://github.com/"
+                                                 "alal3177/automaton.git"))
 
     def test_is_executable(self):
         self.assertFalse(util.is_executable_file("wrong/path"))

@@ -25,16 +25,16 @@ class Cloud(object):
         self.cloud_type = self.cloud_config.get(self.name, "cloud_type")
         self.image_id = self.cloud_config.get(self.name, "image_id")
         self.instance_type = self.cloud_config.get(self.name, "instance_type")
-        self.access_var = self.cloud_config.get(self.name,
-                                                "access_id").strip('$')
-        self.secret_var = self.cloud_config.get(self.name,
-                                                "secret_key").strip('$')
+        aid = self.cloud_config.get(self.name, "access_id")
+        self.access_var = aid.strip('$')
+        sk = self.cloud_config.get(self.name, "secret_key")
+        self.secret_var = sk.strip('$')
         self.access_id = os.environ[self.access_var]
         self.secret_key = os.environ[self.secret_var]
         self.conn = None
 
     def connect(self):
-        """ Connects to the cloud using boto interface """
+        """Connects to the cloud using boto interface"""
 
         self.region = RegionInfo(name=self.cloud_type, endpoint=self.cloud_uri)
         self.conn = EC2Connection(

@@ -50,7 +50,8 @@ class Cluster(object):
                     self.clouds.append(cloud)
                     self.requests.append(request)
         if len(self.clouds) == 0:
-            LOG.debug("Benchmark \"%s\" does not have references to available clouds" % (self.benchmark.name))
+            LOG.debug("Benchmark \"%s\" does not have references to "
+                      "available clouds" % (self.benchmark.name))
         self.reservations = list()  # list of reservations that is
                                     # populated in the launch() method
 
@@ -68,8 +69,9 @@ class Cluster(object):
 
         """
 
-        for i in range(len(self.clouds)):           # for every cloud
-            for j in range(self.requests[i]):       # spawn as many instances as requested
+        # for every cloud, spawn as many instances as requested
+        for i in range(len(self.clouds)):
+            for j in range(self.requests[i]):
                 reservation = self.clouds[i].boot_image()
                 self.reservations.append(reservation)
                 for instance in reservation.instances:
@@ -84,7 +86,8 @@ class Cluster(object):
 
         for reservation in self.reservations:
             for instance in reservation.instances:
-                status = "Cluster: %s, Reservation: %s, Instance: %s, Status: %s, FQDN: %s, Key: %s" %\
+                status = ("Cluster: %s, Reservation: %s, Instance: %s, "
+                          "Status: %s, FQDN: %s, Key: %s") % \
                          (self.benchmark.name, reservation.id, instance.id,
                           instance.state, instance.public_dns_name,
                           instance.key_name)
@@ -152,8 +155,9 @@ class Cluster(object):
                     for path in self.path:
                         file_name = os.path.basename(path)
                         local_path = os.path.join(local_path, file_name)
-                        local_path = local_path + '_' + \
-                                     (datetime.datetime.now()).strftime("%H%M%S") + '_' + instance.instance_type
+                        now = (datetime.datetime.now()).strftime("%H%M%S")
+                        local_path = local_path + '_' + now + '_' + \
+                                     instance.instance_type
                         com = "scp -r " + ssh_username + "@" + \
                               instance.public_dns_name + ":" + path + " " + \
                               local_path
