@@ -11,7 +11,7 @@ Prerequisites
 -------------
 
 Automaton requires that numpy, fabirc, boto, and matplotlib libraries be installed.
-The easiest way to install these libraries is through [pip]
+The easiest way to install these libraries is through [pip].
 
 Numpy can be installed with the command:
 
