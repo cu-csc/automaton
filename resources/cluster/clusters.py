@@ -208,7 +208,7 @@ class Cluster(object):
                             LOG.error("Deploy_software error: " +
                                       command.stderr)
 
-    def excute_benchmarks(self):
+    def execute_benchmarks(self):
         ssh_priv_key = self.config.globals.ssh_priv_key
         ssh_username = self.config.globals.ssh_username
         reservations = list()
