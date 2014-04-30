@@ -102,4 +102,8 @@ Contributing
 <!-- references -->
 [pip]: http://www.pip-installer.org/en/latest/
 [guide to generating ssh keys]: https://help.github.com/articles/generating-ssh-keys
+<<<<<<< HEAD
 [FutureGrid]: http://www.futuregrid.org
+=======
+[FutureGrid]: http://www.futuregrid.org
+>>>>>>> 05c8f431608104025ed220ae83df1d2e006c0535
