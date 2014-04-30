@@ -1,5 +1,6 @@
 import os
 
+
 def get_keystone_creds():
     d = {}
     d['username'] = os.environ['OS_USERNAME']
@@ -7,8 +8,9 @@ def get_keystone_creds():
     d['auth_url'] = os.environ['OS_AUTH_URL']
     d['tenant_name'] = os.environ['OS_TENANT_NAME']
     # Also need to disable certificate validation
-    d['insecure'] = True 
+    d['insecure'] = True
     return d
+
 
 def get_nova_creds():
     d = {}
@@ -17,5 +19,5 @@ def get_nova_creds():
     d['auth_url'] = os.environ['OS_AUTH_URL']
     d['project_id'] = os.environ['OS_TENANT_NAME']
     # Also need to disable certificate validation
-    d['insecure'] = True 
+    d['insecure'] = True
     return d
