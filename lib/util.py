@@ -62,7 +62,7 @@ class RemoteCommand(object):
                                                           'stdout',
                                                           'stderr',
                                                           'warnings'),
-                                          user="root",
+                                          user="ubuntu",
                                           key_filename=[self.ssh_private_key],
                                           disable_known_hosts=True,
                                           linewise=True,
