@@ -177,7 +177,7 @@ class Cluster(object):
                     cmds = list()
                     cmds.append("wget %s" % (self.url))
                     cmds.append("sudo apt-get update")
-                    cmds.append("sudo apt-get install unzip")
+                    cmds.append("sudo apt-get install -y unzip libc6:i386")
                     cmds.append("unzip BioPerf.zip")
                     cmds.append("sed -i 's/read BIOPERF/#read "
                                 "BIOPERF/g' install-BioPerf.sh")
@@ -219,7 +219,7 @@ class Cluster(object):
                                 "~/BioPerf/Scripts/Run-scripts/run-bioperf.sh")
                     cmds.append("./BioPerf/Scripts/Run-scripts/"
                                 "CleanOutputs.sh")
-                    cmds.append("echo 'Y' 'Y'|"
+                    cmds.append("echo 'Y' 'Y' | "
                                 "./BioPerf/Scripts/Run-scripts/run-bioperf.sh"
                                 " > ~/BioPerf/Outputs/log")
 
