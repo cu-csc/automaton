@@ -74,9 +74,9 @@ class Cluster(object):
             for instance in cloud.get_all_instances():
                 reservation = cloud.assign_ip(instance)
                 self.reservations.append(reservation)
-                for instance in reservation.instances:
-                    self.database.add(self.name, self.clouds[i].name,
-                                      instance.id, self.benchmark.name)
+            for instance in reservation.instances:
+                self.database.add(self.name, self.clouds[i].name,
+                                  instance.id, self.benchmark.name)
 
     def log_info(self):
         """Loops through reservations and logs status information for every
